@@ -1,0 +1,23 @@
+from cc3d import CompuCellSetup
+
+from CellMigration2DupdatedSteppables import CellMigration2DupdatedSteppable
+
+CompuCellSetup.register_steppable(steppable=CellMigration2DupdatedSteppable(frequency=1))
+
+from CellMigration2DupdatedSteppables import PolarityEvolutionSteppable
+
+CompuCellSetup.register_steppable(steppable=PolarityEvolutionSteppable(frequency=1))
+
+from CellMigration2DupdatedSteppables import MMPSecretionSteppable
+
+CompuCellSetup.register_steppable(steppable=MMPSecretionSteppable(frequency=1))
+
+from CellMigration2DupdatedSteppables import ECMDegradationSteppable
+
+CompuCellSetup.register_steppable(steppable=ECMDegradationSteppable(frequency=1))
+
+from CellMigration2DupdatedSteppables import IdFieldVisualizationSteppable
+
+CompuCellSetup.register_steppable(steppable=IdFieldVisualizationSteppable(frequency=1))
+
+CompuCellSetup.run()
