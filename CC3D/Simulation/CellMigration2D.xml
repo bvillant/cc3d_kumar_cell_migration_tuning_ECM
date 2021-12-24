@@ -1,0 +1,178 @@
+<CompuCell3D Revision="20210612" Version="4.2.5">
+  
+ 
+   <Metadata>
+      
+      <!-- Basic properties simulation -->
+      <NumberOfProcessors>1</NumberOfProcessors>
+      <DebugOutputFrequency>10</DebugOutputFrequency>
+      <!-- <NonParallelModule Name="Potts"/> -->
+   </Metadata>
+   
+   <Potts>
+      
+      <!-- Basic properties of CPM (GGH) algorithm -->
+      <Dimensions x="500" y="500" z="1"/>
+      <Steps>5000</Steps>
+      <Temperature>0.01</Temperature>
+      <NeighborOrder>1</NeighborOrder>
+   </Potts>
+   
+   <Plugin Name="CellType">
+      
+      <!-- Listing all cell types in the simulation -->
+      <CellType TypeId="0" TypeName="Medium"/>
+      <CellType TypeId="1" TypeName="Epithelial"/>
+      <CellType TypeId="2" TypeName="Cancer"/>
+      <CellType Freeze="" TypeId="3" TypeName="Matrix"/>
+   </Plugin>
+   
+   <Plugin Name="Volume">
+      <VolumeEnergyParameters CellType="Epithelial" LambdaVolume="1.0" TargetVolume="100"/>
+      <VolumeEnergyParameters CellType="Cancer" LambdaVolume="1.0" TargetVolume="100"/>
+   </Plugin>
+   
+   <Plugin Name="Surface">
+      <SurfaceEnergyParameters CellType="Epithelial" LambdaSurface="0.5" TargetSurface="35"/>
+      <SurfaceEnergyParameters CellType="Cancer" LambdaSurface="0.5" TargetSurface="35"/>
+   </Plugin>
+   
+   <Plugin Name="ExternalPotential">
+      
+      <!-- External force applied to cell. Each cell type has different force. -->
+      <!-- For more flexible specification of the constraint (done in Python) please use ExternalPotential plugin without specifying per-type parameters -->
+      <!-- Algorithm options are: PixelBased, CenterOfMassBased -->
+      <Algorithm>PixelBased</Algorithm>
+      <!--<ExternalPotentialParameters CellType="Epithelial" x="-0.5" y="0.0" z="0.0"/>
+      <ExternalPotentialParameters CellType="Cancer" x="-0.5" y="0.0" z="0.0"/>
+      <ExternalPotentialParameters CellType="Matrix" x="-0.5" y="0.0" z="0.0"/>       -->
+   </Plugin>
+   
+   <Plugin Name="CenterOfMass">
+      
+      <!-- Module tracking center of mass of each cell -->
+   </Plugin>
+   
+   <Plugin Name="NeighborTracker">
+      
+      <!-- Module tracking neighboring cells of each cell -->
+   </Plugin>
+   
+   <Plugin Name="PixelTracker">
+      
+      <!-- Module tracking pixels of each cell -->
+   </Plugin>
+   
+   <Plugin Name="BoundaryPixelTracker">
+      
+      <!-- Module tracking boundary pixels of each cell -->
+      <NeighborOrder>1</NeighborOrder>
+   </Plugin>
+   
+   <Plugin Name="Contact">
+      <!-- Specification of adhesion energies -->
+      <Energy Type1="Epithelial" Type2="Epithelial">40.0</Energy>
+      <Energy Type1="Medium" Type2="Epithelial">32.0</Energy>
+      <Energy Type1="Epithelial" Type2="Matrix">16.0</Energy>
+      <Energy Type1="Matrix" Type2="Matrix">5.0</Energy>
+      
+      <Energy Type1="Medium" Type2="Matrix">35.0</Energy>
+      <Energy Type1="Medium" Type2="Medium">35.0</Energy>
+      
+      
+      
+      <Energy Type1="Cancer" Type2="Cancer">40.0</Energy>
+      <Energy Type1="Matrix" Type2="Cancer">16.0</Energy>
+      <Energy Type1="Medium" Type2="Cancer">16.0</Energy>
+      
+      <Energy Type1="Epithelial" Type2="Cancer">24.0</Energy>
+      
+      <NeighborOrder>4</NeighborOrder>
+   </Plugin>
+   
+   <Plugin Name="ConnectivityGlobal">
+   <Penalty Type="Epithelial">1000000</Penalty>
+   <Penalty Type="Cancer">1000000</Penalty>
+
+      <!-- Connectivity constraint applied to each cell. Energy penalty specifies how strong the constraint is. Penalty is specified for each cell type individually  -->
+      <!-- Use Python scripting to setup penalty (connectivity strength) for each cell -->
+      <!-- e.g. self.connectivityGlobalPlugin.setConnectivityStrength(cell,20000000) #cell, connectivity strength -->
+      <!-- This constraint works in 2D and 3D on all type of lattices. It might be slowdown your simulation. For faster option - 2D and square lattice you may use Connectivity or ConnectivityLocalFlex -->
+      <!-- To speed up simulation comment out unnecessary constraints for types which don't need the constraint -->
+   </Plugin>
+   
+   <Steppable Type="DiffusionSolverFE">
+      
+      <!-- Specification of PDE solvers -->
+      <DiffusionField Name="MMP">
+         <DiffusionData>
+            <FieldName>MMP</FieldName>
+            <GlobalDiffusionConstant>0.025</GlobalDiffusionConstant>
+            <ExtraTimesPerMCS>36</ExtraTimesPerMCS>
+            <GlobalDecayConstant>0.002</GlobalDecayConstant>
+            <InitialConcentrationExpression>0</InitialConcentrationExpression>
+            <!-- Additional options are: -->
+            <!-- <ConcentrationFileName>INITIAL CONCENTRATION FIELD - typically a file with path Simulation/NAME_OF_THE_FILE.txt</ConcentrationFileName> -->
+            <!--DiffusionCoefficient CellType="Epithelial">0.1</DiffusionCoefficient>
+            <DiffusionCoefficient CellType="Cancer">0.1</DiffusionCoefficient>
+            <DiffusionCoefficient CellType="Matrix">0.1</DiffusionCoefficient>
+            <DecayCoefficient CellType="Epithelial">0.0001</DecayCoefficient>
+            <DecayCoefficient CellType="Cancer">0.0001</DecayCoefficient>
+            <DecayCoefficient CellType="Matrix">0.0001</DecayCoefficient-->
+         </DiffusionData>
+         <SecretionData>
+            <!-- When secretion is defined inside DissufionSolverFE all secretion constants are scaled automaticaly to account for the extra calls to the diffusion step when handling large diffusion constants -->
+            
+            <!-- Uniform secretion Definition -->
+            <!--Secretion Type="Epithelial">0.1</Secretion>
+            <Secretion Type="Cancer">0.1</Secretion>
+            <Secretion Type="Matrix">0.1</Secretion-->
+            <SecretionOnContact SecreteOnContactWith="Matrix" Type="Epithelial">0.0.05</SecretionOnContact> -->
+            <!-- <ConstantConcentration Type="Matrix">0.1</ConstantConcentration> -->
+         </SecretionData>
+         <BoundaryConditions>
+            <Plane Axis="X">
+               <ConstantValue PlanePosition="Min" Value="0.0"/>
+               <ConstantValue PlanePosition="Max" Value="0.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantDerivative PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+            <Plane Axis="Y">
+               <ConstantDerivative PlanePosition="Min" Value="0.0"/>
+               <ConstantDerivative PlanePosition="Max" Value="0.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantValue PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+         </BoundaryConditions>
+      </DiffusionField>
+   </Steppable>
+   
+   <Steppable Type="PIFInitializer">
+   <PIFName>Lattice_1000Fibrers2.piff</PIFName> 
+   </Steppable>
+
+   <Steppable Type="BlobInitializer">
+        <Region>
+         <Gap>0</Gap>
+         <Width>10</Width>
+         <Radius>50</Radius>
+         <Center x="250" y="250" z="0"/>
+         <Types>Epithelial</Types>
+        </Region>
+    </Steppable>
+
+   
+   <!--<Steppable Type="UniformInitializer">
+      
+      <!-- Initial layout of cells in the form of rectangular slab >
+      <Region>
+         <BoxMin x="100" y="100" z="0"/>
+         <BoxMax x="400" y="400" z="1"/>
+         <Gap>0</Gap>
+         <Width>7</Width>
+         <Types>Epithelial,Cancer,Matrix</Types>
+      </Region>
+   </Steppable>         -->
+</CompuCell3D>
